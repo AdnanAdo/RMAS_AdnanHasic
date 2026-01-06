@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "914213312066",
+    "project_id": "emcall-9d09a",
+    "storage_bucket": "emcall-9d09a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914213312066:android:cbd7386a628b302696bfdb",
+        "android_client_info": {
+          "package_name": "com.example.emcall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYZ1mUIuNvvf8AcZAyx1MR2foKKjBjg3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
