@@ -20,14 +20,6 @@ import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
 
-data class NotificationData(
-    val title: String = "",
-    val message: String = "",
-    val timestamp: Timestamp = Timestamp.now(),
-    val isRead: Boolean = false,
-    val type: String = "EMERGENCY"
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(onBack: () -> Unit) {

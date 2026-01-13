@@ -126,7 +126,6 @@ fun DetailScreen(verificationCode: String, onBack: () -> Unit) {
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Text("DETALJNA OBAVIJEST", style = MaterialTheme.typography.titleLarge)
             Text("FGM, Tuzla, 75000", color = Color.Gray)
 
             Spacer(modifier = Modifier.height(16.dp))
