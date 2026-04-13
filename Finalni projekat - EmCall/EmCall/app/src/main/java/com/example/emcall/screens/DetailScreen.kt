@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -58,7 +58,8 @@ data class EmergencyReport(
     val longitude: Double = 0.0,
     val address: String = "",
     val timestamp: Timestamp = Timestamp.now(),
-    val services_needed: List<String> = emptyList()
+    val services_needed: List<String> = emptyList(),
+    val incident_type: String = ""
 )
 
 data class NotificationData(
@@ -70,7 +71,8 @@ data class NotificationData(
     val description: String = "",
     val imageUrls: List<String> = emptyList(),
     val services_needed: List<String> = emptyList(),
-    val address: String = ""
+    val address: String = "",
+    val incident_type: String = ""
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +86,10 @@ fun DetailScreen(onBack: () -> Unit) {
     val savedVerificationCode = sharedPref.getString("user_verification_code", "Nepoznato") ?: "Nepoznato"
     val selectedServices = remember { mutableStateListOf<String>() }
     val availableServices = listOf("Policija", "Hitna pomoc", "Vatrogasci")
+
+    var selectedIncident by remember { mutableStateOf("") }
+    val availableIncidents = listOf("Požar", "Saobraćajna nesreća", "Ostalo")
+
     var description by remember { mutableStateOf("") }
 
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -179,6 +185,12 @@ fun DetailScreen(onBack: () -> Unit) {
         val reportRef = db.collection("reports").document()
         val notificationRef = db.collection("notifications").document()
 
+        if (selectedIncident.isBlank()) {
+            Toast.makeText(context, "Odaberite vrstu incidenta!", Toast.LENGTH_SHORT).show()
+            isUploading = false
+            return
+        }
+
         val report = EmergencyReport(
             verification_Code = savedVerificationCode,
             description = description,
@@ -187,7 +199,8 @@ fun DetailScreen(onBack: () -> Unit) {
             longitude = selectedLocation.longitude,
             address = locationAddress,
             timestamp = Timestamp.now(),
-            services_needed = selectedServices.toList()
+            services_needed = selectedServices.toList(),
+            incident_type = selectedIncident
         )
 
         val notification = NotificationData(
@@ -198,7 +211,8 @@ fun DetailScreen(onBack: () -> Unit) {
             description = description,
             imageUrls = imageUrls,
             services_needed = selectedServices.toList(),
-            address = locationAddress
+            address = locationAddress,
+            incident_type = selectedIncident
         )
 
         batch.set(reportRef, report)
@@ -335,6 +349,70 @@ fun DetailScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Vrsta incidenta",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    availableIncidents.forEach { incident ->
+                        val isSelected = selectedIncident == incident
+
+                        Card(
+                            modifier = Modifier
+                                .height(60.dp)
+                                .clickable {
+                                    selectedIncident = if (isSelected) "" else incident
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) Color(0xFFE8F5E9) else Color.White
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                if (isSelected) Color(0xFF4CAF50) else Color.LightGray
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 0.dp else 2.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (isSelected) {
+                                        Icon(
+                                            Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            tint = Color(0xFF4CAF50),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                    }
+                                    Text(
+                                        text = incident,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) Color(0xFF2E7D32) else Color.DarkGray,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
